@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RentSmart — ประเมินความสามารถในการเช่าหอพัก</title>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+:root{
+  --ink:#16302B;
+  --paper:#EEF2ED;
+  --paper-deep:#E4EAE3;
+  --gold:#B8862E;
+  --green:#2F6F4E;
+  --red:#A63D2F;
+  --amber:#C68A1E;
+  --line:#C9CFC7;
+}
+@import url('https://fonts.googleapis.com/css2?family=Taviraj:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Sarabun', sans-serif;
+  background:var(--paper);
+  color:var(--ink);
+  min-height:100vh;
+}
+.display{font-family:'Taviraj', serif;}
+.mono{font-family:'JetBrains Mono', monospace;}
+
+.perforate{
+  background-image: radial-gradient(circle, var(--paper) 3px, transparent 3.5px);
+  background-size: 14px 14px;
+  background-position: -3px -3px;
+  height: 10px;
+}
+.perforate.flip{ transform: scaleY(-1); }
+
+@keyframes stampIn {
+  0% { opacity: 0; transform: rotate(-8deg) scale(1.6); }
+  60% { opacity: 1; transform: rotate(-8deg) scale(0.92); }
+  100% { opacity: 1; transform: rotate(-8deg) scale(1); }
+}
+.stamp{ animation: stampIn 0.5s cubic-bezier(.2,.9,.3,1.2) both; }
+
+@keyframes rise {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.rise{ animation: rise 0.4s ease both; }
+
+.wrap{max-width:960px;margin:0 auto;padding:0 24px;}
+
+/* header */
+header.top{display:flex;align-items:center;justify-content:space-between;padding-top:40px;padding-bottom:8px;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-badge{
+  width:32px;height:32px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--ink);color:var(--paper);font-weight:600;font-size:16px;
+}
+.brand-name{font-size:18px;font-weight:600;letter-spacing:0.02em;}
+.sub-tag{font-size:12px;opacity:0.5;}
+
+/* hero */
+.hero{padding-top:40px;padding-bottom:56px;}
+.eyebrow{font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:16px;}
+.hero h1{font-size:36px;font-weight:600;line-height:1.2;margin:0 0 20px 0;max-width:18ch;}
+.hero p{font-size:16px;opacity:0.75;max-width:56ch;margin:0;}
+@media(min-width:640px){ .hero h1{font-size:48px;} .hero p{font-size:18px;} }
+
+/* section grid */
+.calc-section{display:grid;grid-template-columns:1fr;gap:32px;padding-bottom:64px;}
+@media(min-width:768px){ .calc-section{grid-template-columns:3fr 2fr;} }
+
+.section-label{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.step-num{font-size:12px;padding:2px 8px;border-radius:4px;background:var(--paper-deep);font-family:'JetBrains Mono', monospace;}
+.section-label h2{font-size:20px;font-weight:500;margin:0;}
+
+.field-grid{display:grid;grid-template-columns:1fr;gap:16px;margin-top:20px;}
+@media(min-width:640px){ .field-grid{grid-template-columns:1fr 1fr;} }
+
+label.field{display:block;}
+.field-label{display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:6px;opacity:0.75;}
+.field-input-wrap{
+  display:flex;align-items:center;border-radius:6px;overflow:hidden;
+  border:1.5px solid var(--line); background:#fff;
+}
+.field-input-wrap .currency{
+  font-family:'JetBrains Mono', monospace;font-size:14px;padding:10px 12px;
+  opacity:0.45;border-right:1.5px solid var(--line);
+}
+.field-input-wrap input{
+  font-family:'JetBrains Mono', monospace;width:100%;padding:10px 12px;font-size:16px;
+  border:none;outline:none;background:transparent;color:var(--ink);
+}
+
+.whatif-block{padding-top:16px;}
+.whatif-desc{font-size:14px;margin-bottom:12px;opacity:0.65;}
+.whatif-card{border-radius:6px;padding:16px;background:#fff;border:1.5px solid var(--line);}
+.whatif-row{display:flex;align-items:center;justify-content:space-between;font-size:14px;margin-bottom:8px;}
+.whatif-row .val{font-family:'JetBrains Mono', monospace;font-weight:500;}
+input[type="range"]{width:100%;accent-color:var(--gold);}
+.whatif-note{font-family:'JetBrains Mono', monospace;font-size:12px;margin-top:8px;opacity:0.5;}
+
+/* receipt */
+.receipt-wrap{position:sticky;top:24px;}
+.receipt-body{
+  padding:20px 24px 24px 24px;background:#fff;
+  border:1.5px solid var(--line); border-top:none;
+}
+.receipt-top{border-radius:10px 10px 0 0;}
+.receipt-bottom{border-radius:0 0 10px 10px;}
+.receipt-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.receipt-head span{font-family:'JetBrains Mono', monospace;font-size:12px;opacity:0.4;letter-spacing:0.05em;}
+
+.stamp-row{position:relative;display:flex;align-items:center;justify-content:center;padding:12px 0;}
+.stamp-pill{
+  display:flex;align-items:center;gap:8px;padding:8px 20px;border-radius:999px;
+  border-width:3px;border-style:double;
+}
+.stamp-pill span{font-family:'Taviraj', serif;font-size:20px;font-weight:600;letter-spacing:0.02em;}
+
+.receipt-note{font-size:14px;text-align:center;margin:0 0 20px 0;opacity:0.7;}
+.receipt-divider{height:1px;background:var(--line);margin-bottom:16px;}
+
+.receipt-rows{display:flex;flex-direction:column;gap:10px;}
+.receipt-row{display:flex;align-items:baseline;justify-content:space-between;font-size:14px;}
+.receipt-row .label{opacity:0.65;}
+.receipt-row .hint{font-family:'JetBrains Mono', monospace;margin-left:6px;font-size:12px;opacity:0.5;}
+.receipt-row .value{font-family:'JetBrains Mono', monospace;font-weight:500;}
+
+/* dorm cards */
+.dorms-section{padding-bottom:64px;}
+.dorms-desc{font-size:14px;margin-bottom:20px;opacity:0.65;}
+.dorm-grid{display:grid;grid-template-columns:1fr;gap:16px;}
+@media(min-width:640px){ .dorm-grid{grid-template-columns:1fr 1fr;} }
+.dorm-card{
+  border-radius:6px;padding:20px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+  background:#fff;border:1.5px solid var(--line);
+}
+.dorm-card h3{font-family:'Taviraj', serif;font-size:16px;font-weight:500;margin:0 0 4px 0;}
+.dorm-card .dist{font-size:12px;margin-bottom:12px;opacity:0.55;}
+.dorm-card .price{font-family:'JetBrains Mono', monospace;font-size:14px;}
+.dorm-card .price .util{opacity:0.5;}
+.verdict-badge{
+  font-family:'JetBrains Mono', monospace;font-size:12px;padding:4px 10px;border-radius:999px;
+  white-space:nowrap;display:flex;align-items:center;gap:4px;border-width:1.5px;border-style:solid;
+}
+
+/* compare table */
+.compare-section{padding-bottom:96px;}
+.compare-desc{font-size:14px;margin-bottom:20px;opacity:0.65;}
+.compare-table{border-radius:6px;overflow:hidden;background:#fff;border:1.5px solid var(--line);}
+.compare-head, .compare-row{
+  display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr 32px;align-items:center;
+}
+.compare-head{
+  font-size:12px;font-family:'JetBrains Mono', monospace;text-transform:uppercase;letter-spacing:0.05em;
+  padding:12px 20px;background:var(--paper-deep);opacity:0.7;
+}
+.compare-row{padding:12px 20px;font-size:14px;border-top:1px solid var(--line);}
+.compare-row input{
+  font-family:'JetBrains Mono', monospace;background:transparent;border:none;outline:none;color:var(--ink);
+}
+.compare-row input.name-input{padding-right:8px;width:100%;}
+.compare-row input.num-input{width:80px;}
+.leftover-val{font-family:'JetBrains Mono', monospace;}
+.verdict-cell{font-family:'JetBrains Mono', monospace;font-size:12px;}
+.del-btn{opacity:0.4;background:none;border:none;cursor:pointer;color:var(--ink);padding:0;display:flex;}
+.del-btn:hover{opacity:1;}
+.add-room-btn{
+  width:100%;display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:12px;font-size:14px;font-family:'JetBrains Mono', monospace;
+  background:none;border:none;border-top:1px dashed var(--line);opacity:0.6;cursor:pointer;color:var(--ink);
+}
+.add-room-btn:hover{opacity:1;}
+
+footer.foot{padding-bottom:40px;}
+.foot-divider{height:1px;background:var(--line);margin-bottom:20px;}
+.foot-note{font-size:12px;display:flex;align-items:center;gap:6px;opacity:0.45;margin:0;}
+
+svg.icon{flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="brand-badge">฿</div>
+      <span class="brand-name display">RentSmart</span>
+    </div>
+    <span class="sub-tag mono">มทร.สุวรรณภูมิ · ศูนย์นนทบุรี</span>
+  </header>
+
+  <section class="hero">
+    <p class="eyebrow mono">ระบบประเมินความสามารถในการเช่าหอพัก</p>
+    <h1 class="display">เช่าห้องนี้ไหวจริงไหม รู้คำตอบก่อนเซ็นสัญญา</h1>
+    <p>กรอกรายรับ-รายจ่าย ระบบคำนวณให้ทันทีว่างบของคุณรับไหวไหม พร้อมแนะนำห้องที่เหมาะสมและเทียบตัวเลือกได้ในหน้าเดียว</p>
+  </section>
+
+  <section class="calc-section">
+    <div>
+      <div class="section-label">
+        <span class="step-num">01</span>
+        <h2 class="display">กรอกรายรับ-รายจ่าย</h2>
+      </div>
+
+      <div class="field-grid">
+        <label class="field rise">
+          <span class="field-label"><i data-lucide="wallet" size="16"></i>รายได้ต่อเดือน</span>
+          <div class="field-input-wrap">
+            <span class="currency">฿</span>
+            <input type="number" inputmode="numeric" id="f-income" placeholder="18000" value="18000">
+          </div>
+        </label>
+        <label class="field rise">
+          <span class="field-label"><i data-lucide="piggy-bank" size="16"></i>เงินออมสำรอง</span>
+          <div class="field-input-wrap">
+            <span class="currency">฿</span>
+            <input type="number" inputmode="numeric" id="f-savings" placeholder="6000" value="6000">
+          </div>
+        </label>
+        <label class="field rise">
+          <span class="field-label"><i data-lucide="shopping-bag" size="16"></i>ค่าใช้จ่ายส่วนตัว</span>
+          <div class="field-input-wrap">
+            <span class="currency">฿</span>
+            <input type="number" inputmode="numeric" id="f-personal" placeholder="8000" value="8000">
+          </div>
+        </label>
+        <label class="field rise">
+          <span class="field-label"><i data-lucide="home" size="16"></i>ค่าเช่าห้อง</span>
+          <div class="field-input-wrap">
+            <span class="currency">฿</span>
+            <input type="number" inputmode="numeric" id="f-rent" placeholder="4500" value="4500">
+          </div>
+        </label>
+        <label class="field rise">
+          <span class="field-label"><i data-lucide="droplets" size="16"></i>ค่าน้ำ-ค่าไฟโดยประมาณ</span>
+          <div class="field-input-wrap">
+            <span class="currency">฿</span>
+            <input type="number" inputmode="numeric" id="f-water" placeholder="1200" value="1200">
+          </div>
+        </label>
+        <label class="field rise">
+          <span class="field-label"><i data-lucide="wifi" size="16"></i>ค่าอินเทอร์เน็ต/มือถือ</span>
+          <div class="field-input-wrap">
+            <span class="currency">฿</span>
+            <input type="number" inputmode="numeric" id="f-internet" placeholder="300" value="300">
+          </div>
+        </label>
+      </div>
+
+      <div class="whatif-block">
+        <div class="section-label">
+          <span class="step-num">02</span>
+          <h2 class="display">จำลองสถานการณ์</h2>
+        </div>
+        <p class="whatif-desc">ลองปรับลดค่าใช้จ่ายส่วนตัว ดูว่าผลประเมินเปลี่ยนไหม</p>
+        <div class="whatif-card">
+          <div class="whatif-row">
+            <span style="opacity:0.7">ลดค่าใช้จ่ายส่วนตัวลง</span>
+            <span class="val mono" id="whatif-amount">฿0 / เดือน</span>
+          </div>
+          <input type="range" id="whatif-slider" min="0" max="6000" step="100" value="0">
+          <p class="whatif-note" id="whatif-effective">ค่าใช้จ่ายส่วนตัวใหม่: ฿8,000</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="receipt-wrap rise" id="receipt-container"></div>
+    </div>
+  </section>
+
+  <section class="dorms-section">
+    <div class="section-label">
+      <span class="step-num">03</span>
+      <h2 class="display">ห้องแนะนำใกล้มหาวิทยาลัย</h2>
+    </div>
+    <p class="dorms-desc">กรองจากงบที่คุณกรอกไว้ด้านบน โดยใช้เกณฑ์เดียวกับใบประเมิน</p>
+    <div class="dorm-grid" id="dorm-grid"></div>
+  </section>
+
+  <section class="compare-section">
+    <div class="section-label">
+      <span class="step-num">04</span>
+      <h2 class="display">เปรียบเทียบหลายห้อง</h2>
+    </div>
+    <p class="compare-desc">เพิ่มห้องที่กำลังตัดสินใจ แล้วดูว่าห้องไหนเหลือเงินมากที่สุด</p>
+
+    <div class="compare-table">
+      <div class="compare-head">
+        <span>ชื่อห้อง</span>
+        <span>ค่าเช่า</span>
+        <span>ค่าน้ำไฟ</span>
+        <span>เงินคงเหลือ</span>
+        <span>ผลประเมิน</span>
+        <span></span>
+      </div>
+      <div id="compare-rows"></div>
+      <button class="add-room-btn" id="add-room-btn">
+        <i data-lucide="plus" size="14"></i> เพิ่มห้องเพื่อเปรียบเทียบ
+      </button>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="foot-divider"></div>
+    <p class="foot-note">
+      <i data-lucide="sparkles" size="12"></i>
+      ผลประเมินใช้เกณฑ์ทั่วไปเพื่อการวางแผนเบื้องต้น ไม่ใช่คำแนะนำทางการเงินอย่างเป็นทางการ
+    </p>
+  </footer>
+</div>
+
+<script>
+const INK = "#16302B", GREEN = "#2F6F4E", RED = "#A63D2F", AMBER = "#C68A1E";
+
+const MOCK_DORMS = [
+  { name: "Sky Place Apartment", distance: "1.1 กม. จากมหาวิทยาลัย", rent: 3200, utilities: 900 },
+  { name: "อมรภัณฑ์ อพาร์ทเม้นท์", distance: "0.7 กม. จากมหาวิทยาลัย", rent: 3800, utilities: 850 },
+  { name: "บ้านสมบุญ เรสซิเดนซ์", distance: "1.6 กม. จากมหาวิทยาลัย", rent: 2900, utilities: 800 },
+  { name: "ไชยวรรณ แมนชั่น", distance: "0.9 กม. จากมหาวิทยาลัย", rent: 3500, utilities: 950 },
+];
+
+function THB(n) {
+  return (isFinite(n) ? n : 0).toLocaleString("th-TH", { maximumFractionDigits: 0 });
+}
+
+function evaluateAffordability({ income, personal, rent, water, internet, savings }) {
+  const totalExpense = personal + rent + water + internet;
+  const leftover = income - totalExpense;
+  const leftoverRatio = income > 0 ? leftover / income : -1;
+  const rentRatio = income > 0 ? rent / income : 1;
+  const bufferMonths = rent > 0 ? savings / rent : 0;
+
+  let verdict = "เกินงบ", tone = RED;
+  let note = "รายจ่ายรวมสูงเกินรายได้ที่มี ควรมองห้องราคาย่อมเยากว่านี้";
+
+  if (leftoverRatio >= 0.2 && rentRatio <= 0.3) {
+    verdict = "เช่าได้"; tone = GREEN;
+    note = "สัดส่วนค่าเช่าและเงินคงเหลือหลังหักรายจ่ายอยู่ในเกณฑ์ปลอดภัย";
+  } else if (leftoverRatio >= 0.1 && rentRatio <= 0.4) {
+    verdict = "ควรพิจารณา"; tone = AMBER;
+    note = "พอเช่าได้ แต่งบตึงตัว ควรมีเงินสำรองฉุกเฉินเผื่อไว้";
+  }
+
+  return { totalExpense, leftover, leftoverRatio, rentRatio, bufferMonths, verdict, tone, note };
+}
+
+function verdictIcon(verdict) {
+  if (verdict === "เช่าได้") return "check";
+  if (verdict === "ควรพิจารณา") return "alert-triangle";
+  return "x";
+}
+
+// state
+let state = {
+  income: 18000,
+  personal: 8000,
+  rent: 4500,
+  water: 1200,
+  internet: 300,
+  savings: 6000,
+  whatIfDelta: 0,
+};
+
+let compareRooms = [
+  { id: 1, name: "ห้องที่กำลังดู", rent: 4500, utilities: 1200 },
+];
+
+function effectivePersonal() {
+  return Math.max(0, state.personal - state.whatIfDelta);
+}
+
+function getResult() {
+  return evaluateAffordability({
+    income: state.income,
+    personal: effectivePersonal(),
+    rent: state.rent,
+    water: state.water,
+    internet: state.internet,
+    savings: state.savings,
+  });
+}
+
+function renderReceipt() {
+  const r = getResult();
+  const iconName = verdictIcon(r.verdict);
+  const dateStr = new Date().toLocaleDateString("th-TH", { day: "2-digit", month: "short", year: "numeric" });
+  const idNum = String(state.income).slice(0, 3) || "000";
+
+  const html = `
+    <div class="perforate receipt-top"></div>
+    <div class="receipt-body">
+      <div class="receipt-head">
+        <span>ใบประเมิน No. RS-${idNum}</span>
+        <span>${dateStr}</span>
+      </div>
+
+      <div class="stamp-row">
+        <div class="stamp-pill stamp" style="border-color:${r.tone};color:${r.tone}" id="stamp-pill">
+          <i data-lucide="${iconName}" size="20"></i>
+          <span>${r.verdict}</span>
+        </div>
+      </div>
+
+      <p class="receipt-note">${r.note}</p>
+      <div class="receipt-divider"></div>
+
+      <div class="receipt-rows">
+        <div class="receipt-row">
+          <span class="label">รายจ่ายรวมต่อเดือน</span>
+          <span class="value">฿${THB(r.totalExpense)}</span>
+        </div>
+        <div class="receipt-row">
+          <span class="label">เงินคงเหลือ</span>
+          <span class="value" style="color:${r.leftover >= 0 ? GREEN : RED}">฿${THB(r.leftover)}</span>
+        </div>
+        <div class="receipt-row">
+          <span class="label">สัดส่วนเงินเหลือ / รายได้<span class="hint">(เกณฑ์ ≥ 20%)</span></span>
+          <span class="value">${(r.leftoverRatio * 100).toFixed(0)}%</span>
+        </div>
+        <div class="receipt-row">
+          <span class="label">สัดส่วนค่าเช่า / รายได้<span class="hint">(เกณฑ์ ≤ 30%)</span></span>
+          <span class="value">${(r.rentRatio * 100).toFixed(0)}%</span>
+        </div>
+        <div class="receipt-row">
+          <span class="label">เงินสำรองเทียบค่าเช่า<span class="hint">(แนะนำ ≥ 2 เดือน)</span></span>
+          <span class="value">${r.bufferMonths.toFixed(1)} เดือน</span>
+        </div>
+      </div>
+    </div>
+    <div class="perforate receipt-bottom flip"></div>
+  `;
+  document.getElementById("receipt-container").innerHTML = html;
+  lucide.createIcons();
+}
+
+function renderDorms() {
+  const grid = document.getElementById("dorm-grid");
+  grid.innerHTML = MOCK_DORMS.map(d => {
+    const r = evaluateAffordability({
+      income: state.income,
+      personal: effectivePersonal(),
+      rent: d.rent,
+      water: d.utilities,
+      internet: state.internet,
+      savings: state.savings,
+    });
+    return `
+      <div class="dorm-card">
+        <div>
+          <h3 class="display">${d.name}</h3>
+          <p class="dist">${d.distance}</p>
+          <p class="price">฿${THB(d.rent)} <span class="util">+ ค่าน้ำไฟ ~฿${THB(d.utilities)}</span></p>
+        </div>
+        <span class="verdict-badge" style="color:${r.tone};border-color:${r.tone}">
+          <i data-lucide="${verdictIcon(r.verdict)}" size="12"></i>
+          ${r.verdict}
+        </span>
+      </div>
+    `;
+  }).join("");
+  lucide.createIcons();
+}
+
+function renderCompare() {
+  const container = document.getElementById("compare-rows");
+
+  const rows = compareRooms.map(room => ({
+    room,
+    result: evaluateAffordability({
+      income: state.income,
+      personal: effectivePersonal(),
+      rent: room.rent,
+      water: room.utilities,
+      internet: state.internet,
+      savings: state.savings,
+    })
+  })).sort((a, b) => b.result.leftover - a.result.leftover);
+
+  container.innerHTML = rows.map(({ room, result: r }, idx) => `
+    <div class="compare-row" data-id="${room.id}">
+      <input class="name-input" value="${room.name}" data-field="name" data-id="${room.id}">
+      <input class="num-input" type="number" value="${room.rent === 0 ? "" : room.rent}" data-field="rent" data-id="${room.id}">
+      <input class="num-input" type="number" value="${room.utilities === 0 ? "" : room.utilities}" data-field="utilities" data-id="${room.id}">
+      <span class="leftover-val" style="color:${r.leftover >= 0 ? GREEN : RED}">฿${THB(r.leftover)}</span>
+      <span class="verdict-cell" style="color:${r.tone}">${idx === 0 ? "★ " : ""}${r.verdict}</span>
+      <button class="del-btn" data-id="${room.id}" aria-label="ลบห้องนี้">
+        <i data-lucide="trash-2" size="15"></i>
+      </button>
+    </div>
+  `).join("");
+
+  container.querySelectorAll("input").forEach(inp => {
+    inp.addEventListener("input", (e) => {
+      const id = Number(e.target.dataset.id);
+      const field = e.target.dataset.field;
+      const room = compareRooms.find(r => r.id === id);
+      if (!room) return;
+      room[field] = field === "name" ? e.target.value : (Number(e.target.value) || 0);
+      renderCompare();
+    });
+  });
+  container.querySelectorAll(".del-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const id = Number(e.currentTarget.dataset.id);
+      compareRooms = compareRooms.filter(r => r.id !== id);
+      renderCompare();
+    });
+  });
+
+  lucide.createIcons();
+}
+
+function renderAll() {
+  renderReceipt();
+  renderDorms();
+  renderCompare();
+  document.getElementById("whatif-amount").textContent = `฿${THB(state.whatIfDelta)} / เดือน`;
+  document.getElementById("whatif-effective").textContent = `ค่าใช้จ่ายส่วนตัวใหม่: ฿${THB(effectivePersonal())}`;
+}
+
+// wire up field inputs
+function bindField(id, key) {
+  document.getElementById(id).addEventListener("input", (e) => {
+    state[key] = Number(e.target.value) || 0;
+    if (key === "personal") {
+      const slider = document.getElementById("whatif-slider");
+      slider.max = Math.min(state.personal, 6000);
+      if (state.whatIfDelta > state.personal) {
+        state.whatIfDelta = 0;
+        slider.value = 0;
+      }
+    }
+    renderAll();
+  });
+}
+bindField("f-income", "income");
+bindField("f-savings", "savings");
+bindField("f-personal", "personal");
+bindField("f-rent", "rent");
+bindField("f-water", "water");
+bindField("f-internet", "internet");
+
+document.getElementById("whatif-slider").addEventListener("input", (e) => {
+  state.whatIfDelta = Number(e.target.value);
+  renderAll();
+});
+
+document.getElementById("add-room-btn").addEventListener("click", () => {
+  compareRooms.push({
+    id: Date.now(),
+    name: `ห้องตัวเลือก ${compareRooms.length + 1}`,
+    rent: 3000,
+    utilities: 800,
+  });
+  renderCompare();
+});
+
+// init
+lucide.createIcons();
+renderAll();
+</script>
+
+</body>
+</html>
